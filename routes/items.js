@@ -107,6 +107,7 @@ router.put("/update", (req, res) => {
     r = req.body;
     userSearch = { 'username': r.username};
     User.find(userSearch).then(user => {
+        console.log(user[0].username);
         if(!user[0]){
             errors.noUsers = "No user was found";
             return res.status(400).json(errors);
@@ -120,7 +121,8 @@ router.put("/update", (req, res) => {
                     .catch(err => res.status(404).json(err));
             }
     }).catch(err => res.status(404).json(err));
-});
+})
+})
 
 
 router.delete("/delete", (req, res) => {
@@ -130,6 +132,7 @@ router.delete("/delete", (req, res) => {
 
     userSearch = { 'username': r.username};
     User.find(userSearch).then(user => {
+        console.log(user[0].username);
         if(!user[0]){
             errors.noUsers = "No user was found";
             return res.status(400).json(errors);
@@ -150,7 +153,7 @@ router.delete("/delete", (req, res) => {
         }).catch(err => res.status(404).json(err));
     })
         .catch(err => res.status(404).json(err));
-    });
+    })
 
 
 module.exports = router;
