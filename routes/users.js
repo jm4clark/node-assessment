@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const User = require("../models/users.js");
+const validateUser = require("../validation/validateUser.js");
 
 
 router.get("/getAll", (req, res) => {
@@ -15,5 +17,10 @@ router.get("/getAll", (req, res) => {
     })
     .catch(err => res.status(404).json({ error : `${err}` }));
 });
+
+router.get("/register", (req, res) => {
+    const errors = {};
+
+})
 
 module.exports = router;
