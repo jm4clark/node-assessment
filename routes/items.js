@@ -32,9 +32,20 @@ router.post("/add", (req, res) => {
         content: r.content
     });
 
-    /*validateAuthor(newItem, r).then(result => {
-        if(result){ return result;}
-    }).catch(err => {return res.status(400).json(err);});*/
+    /*validateAuthor(newItem, r).then((isValid) => {
+        console.log("isValid: " + isValid);
+        if(!isValid){
+            console.log("valid errors");
+            return res.status(400).json(isValid.errors);
+        }
+        console.log("no valid errors");
+        newItem.save().then(() => {
+            return res.send("item added!");})
+        .catch(err => res.status(404).json(err));
+    });*/
+    //.then(result => {
+       // if(result){ return result;}
+    //}).catch(err => {return res.status(400).json(err);});
 
     User.find({}).then(users => {
         var userFound = false;
@@ -59,9 +70,9 @@ router.post("/add", (req, res) => {
             return res.status(400).json(errors.credentials) ;
         }
     }).catch(err => res.status(404).json({ error : `${err}` }));
-})
+});
 
-router.post("/add", (req, res) => {
+router.post("/addHash", (req, res) => {
 
     var r = req.body;
     const validate = validateItem(r);
@@ -94,28 +105,52 @@ router.post("/add", (req, res) => {
 
 router.put("/update", (req, res) => {
     r = req.body;
-    Item.updateOne({ 'username': r.username }, { $set: { 'username': r.username, 'content': r.content} })
-        .then(() => {
-            res.send("Updated Item")
-        })
-        .catch(err => res.status(404).json(err));
+    userSearch = { 'username': r.username};
+    User.find(userSearch).then(user => {
+        if(!user[0]){
+            errors.noUsers = "No user was found";
+            return res.status(400).json(errors);
+        }
+        bcrypt.compare(r.password, user[0].password).then(isMatch => {
+            if(isMatch) {
+                Item.updateOne({ 'username': r.username }, { $set: { 'username': r.username, 'content': r.content} })
+                    .then(() => {
+                        res.send("Updated Item")
+                    })
+                    .catch(err => res.status(404).json(err));
+            }
+    }).catch(err => res.status(404).json(err));
 });
 
 
 router.delete("/delete", (req, res) => {
     var r = req.body;
     const errors = {};
-    var search = { 'username': r.username };
-    Item.findOneAndDelete(search)
-        .then(items => {
-            if (!items) {
-                errors.noItems = "There are no items";
-                res.status(404).json(errors);
+    var search = { 'name': r.name };
+
+    userSearch = { 'username': r.username};
+    User.find(userSearch).then(user => {
+        if(!user[0]){
+            errors.noUsers = "No user was found";
+            return res.status(400).json(errors);
+        }
+        bcrypt.compare(r.password, user[0].password).then(isMatch => {
+            if(isMatch) {
+                Item.findOneAndDelete(search)
+                .then(items => {
+                        
+                    if (!items) {
+                        errors.noItems = "There are no items";
+                        res.status(404).json(errors);
+                    }
+                    res.send('Removed Item');
+                })
+                .catch(err => res.status(404).json(err));
             }
-            res.send('Removed Item');
-        })
+        }).catch(err => res.status(404).json(err));
+    })
         .catch(err => res.status(404).json(err));
-});
+    });
 
 
 module.exports = router;
