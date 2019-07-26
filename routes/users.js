@@ -32,10 +32,17 @@ router.post("/register", (req, res) => {
         password: r.password
     });
 
-
-    newUser.save().then(() => console.log("added")
-    .catch(err => res.status(404).json(err)));
-    res.end("User added!");
+    //console.log("begin hashing");
+    bcrypt.genSalt(10, (err,salt) => {
+        //console.log("salted");
+        bcrypt.hash(newUser.password, salt, (err,hash) => {
+            //console.log("hashed");
+            if (err) { console.log(err); }
+            newUser.password = hash;
+            newUser.save().then(user => res.end("user added!"))
+            .catch(err => console.log(err));
+        });
+    });
 })
 
 module.exports = router;
