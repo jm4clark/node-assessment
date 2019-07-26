@@ -7,7 +7,7 @@ const validateUser = require("../validation/validateUser.js");
 
 router.get("/getAll", (req, res) => {
     const errors = {};
-    User.find({}, '-email')
+    User.find({})
     .then(users => {
         if(!users) {
             errors.noUsers = "There are no users";
@@ -18,9 +18,24 @@ router.get("/getAll", (req, res) => {
     .catch(err => res.status(404).json({ error : `${err}` }));
 });
 
-router.get("/register", (req, res) => {
+router.post("/register", (req, res) => {
     const errors = {};
+    var r = req.body;
+    const validate = validateUser(r);
+    if(!validate.isValid){
+        console.log(validate.errors);
+        return res.status(400).json(validate.errors);
+    }
+    var newUser = new User({
+        username: r.username,
+        email: r.email,
+        password: r.password
+    });
 
+
+    newUser.save().then(() => console.log("added")
+    .catch(err => res.status(404).json(err)));
+    res.end("User added!");
 })
 
 module.exports = router;
