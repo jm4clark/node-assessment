@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const Item = require("../models/items.js");
 const User = require("../models/users.js");
 const validateItem = require("../validation/validateItem.js");
+const validateAuthor = require("../validation/validateAuthor.js");
 
 router.get("/getAll", (req, res) => {
     const errors = {};
@@ -12,10 +13,6 @@ router.get("/getAll", (req, res) => {
         if(!items) {
             errors.noItems = "There are no items";
             res.status(404).json(errors);
-        }
-        for(i in items){
-            console.log(i);
-            console.log(i.username);
         }
         res.json(items);
     })
@@ -35,27 +32,33 @@ router.post("/add", (req, res) => {
         content: r.content
     });
 
+    /*validateAuthor(newItem, r).then(result => {
+        if(result){ return result;}
+    }).catch(err => {return res.status(400).json(err);});*/
+
     User.find({}).then(users => {
+        var userFound = false;
         for(u in users){
             if(newItem.author === users[u].username){
-            bcrypt.compare(r.password, users[u].password).then(isMatch => {
+                userFound = true;
+                bcrypt.compare(r.password, users[u].password).then(isMatch => {
                 if (isMatch){
-                    newItem.save().then(() => console.log("added")
-                    .catch(err => res.status(404).json(err)));
-                    res.end("item added!");
+                    newItem.save().then(() => {
+                        return res.send("item added!");})
+                    .catch(err => res.status(404).json(err));
+                    
                 } else{
                     errors.credentials = "Incorrect password";
                     return res.status(400).json(errors.credentials)
                 }
-            })
+                })
             }  
         }
-        errors.credentials = "Username not found.";
-        return res.status(400).json(errors.credentials);  
+        if(!userFound){
+            errors.credentials = "Username not found."; 
+            return res.status(400).json(errors.credentials) ;
+        }
     }).catch(err => res.status(404).json({ error : `${err}` }));
-
-    
-    
 })
 
 router.post("/add", (req, res) => {
