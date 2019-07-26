@@ -28,7 +28,7 @@ module.exports = function validateUser(data){
 
     if (!validator.equals(data.password, data.passwordconfirm)){
         errors.passwordconfirm = "Passwords must match";
-    }
+    }    
 
     return { errors, isValid: isEmpty(errors)};
 };
