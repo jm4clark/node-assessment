@@ -7,7 +7,7 @@ const validateUser = require("../validation/validateUser.js");
 
 router.get("/getAll", (req, res) => {
     const errors = {};
-    User.find({}, " -password")
+    User.find({}, " -password -passwordconfirm")
     .then(users => {
         if(!users) {
             errors.noUsers = "There are no users";
@@ -29,7 +29,8 @@ router.post("/register", (req, res) => {
     var newUser = new User({
         username: r.username,
         email: r.email,
-        password: r.password
+        password: r.password,
+        passwordconfirm: r.passwordconfirm
     });
 
     //console.log("begin hashing");
