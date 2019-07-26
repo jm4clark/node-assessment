@@ -13,6 +13,10 @@ var userSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    passwordconfirm: {
+        type: String,
+        required: true
     }
 });
 

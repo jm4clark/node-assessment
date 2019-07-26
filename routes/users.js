@@ -29,7 +29,8 @@ router.post("/register", (req, res) => {
     var newUser = new User({
         username: r.username,
         email: r.email,
-        password: r.password
+        password: r.password,
+        passwordconfirm: r.passwordconfirm
     });
 
     //console.log("begin hashing");
